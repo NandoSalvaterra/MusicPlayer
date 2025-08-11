@@ -2,6 +2,7 @@ import Foundation
 
 public enum NetworkError: Error, Sendable {
     case invalidURL
+    case offline
     case transport(URLError)
     case noResponse
     case invalidResponse

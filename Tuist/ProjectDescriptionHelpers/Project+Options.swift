@@ -30,3 +30,32 @@ public extension Project.Options {
         )
     }
 }
+
+public extension Settings {
+    static var projectSettings: Settings {
+        .settings(
+            base: [
+                "SWIFT_VERSION": "6.0",
+                "SWIFT_STRICT_CONCURRENCY": "complete",
+
+                "SWIFT_COMPILATION_MODE": "wholemodule",
+                "SWIFT_TREAT_WARNINGS_AS_ERRORS": "NO",
+            ],
+            configurations: [
+                .debug(
+                    name: "Debug",
+                    settings: [
+                        "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
+                        "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG"
+                    ]
+                ),
+                .release(
+                    name: "Release",
+                    settings: [
+                        "SWIFT_OPTIMIZATION_LEVEL": "-O"
+                    ]
+                )
+            ]
+        )
+    }
+}
