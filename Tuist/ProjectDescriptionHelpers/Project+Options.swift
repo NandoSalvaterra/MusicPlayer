@@ -38,7 +38,7 @@ public extension Settings {
                 "SWIFT_VERSION": "6.0",
                 "SWIFT_STRICT_CONCURRENCY": "complete",
 
-                "SWIFT_COMPILATION_MODE": "wholemodule",
+                "SWIFT_COMPILATION_MODE": "singlefile",
                 "SWIFT_TREAT_WARNINGS_AS_ERRORS": "NO",
             ],
             configurations: [
