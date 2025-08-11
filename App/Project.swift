@@ -9,19 +9,19 @@ let project = Project(
             name: "App",
             destinations: .iOS,
             product: .app,
-            bundleId: "com.musicplayer",
+            bundleId: "com.musicplayer.app",
             infoPlist: "SupportFiles/Info.plist",
             sources: ["Sources/**"],
             resources: ["Resources/**"],
             dependencies: [
-              //  .project(target: "Domain", path: "../Domain")
+            //.project(target: "Network", path: "../Network")
             ]
         ),
         .target(
             name: "AppTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "com.musicplayer.tests",
+            bundleId: "com.musicplayer.app.tests",
             infoPlist: "Tests/SupportFiles/AppTests-Info.plist",
             sources: ["Tests/**"],
             resources: [],

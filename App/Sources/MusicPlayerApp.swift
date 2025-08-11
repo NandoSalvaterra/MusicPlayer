@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct EvolutionApp: App {
+struct MusicPlayerApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
