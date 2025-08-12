@@ -4,9 +4,7 @@ import SwiftUI
 struct MusicPlayerApp: App {
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                SplashView()
-            }
+            RootView()
         }
     }
 }
