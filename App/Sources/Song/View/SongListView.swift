@@ -33,7 +33,7 @@ struct SongListView: View {
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: LocalizedStrings.search)
         .scrollDismissesKeyboard(.immediately)
         .navigationDestination(item: $selectedSong) { song in
-            PlayerView(title: song.title, artist: song.artist)
+            PlayerView()
         }
     }
 }

@@ -10,6 +10,7 @@ struct PlayerView: View {
     @State private var currentTime: Double = 0
     @State private var totalDuration: Double = 200
     @State private var showOptionsSheet: Bool = false
+    @State private var showAlbumSongList: Bool = false
 
     var body: some View {
             VStack(spacing: 0) {
@@ -35,7 +36,17 @@ struct PlayerView: View {
                     .ignoresSafeArea(edges: .all)
             )
             .sheet(isPresented: $showOptionsSheet) {
-                SongOptionsSheet(title: "Something", artist: "Artist")
+                SongOptionsSheet(title: songTitle, artist: artistName) {
+                    showOptionsSheet = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showAlbumSongList = true
+                    }
+                }
+            }
+            .sheet(isPresented: $showAlbumSongList) {
+                AlbumSongListView(albumTitle: "Album", artistName: artistName)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
             }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
