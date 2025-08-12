@@ -1,6 +1,7 @@
 {
-  "colors" : [
+  "images" : [
     {
+      "filename" : "icon_music_note.pdf",
       "idiom" : "universal"
     }
   ],
