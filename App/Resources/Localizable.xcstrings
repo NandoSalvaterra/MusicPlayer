@@ -1,6 +1,29 @@
 {
   "sourceLanguage" : "en_US",
   "strings" : {
+    "no_artist_song" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Song without artist"
+          }
+        },
+        "en_US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Song without artist"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Música sem artista"
+          }
+        }
+      }
+    },
     "no_internet_connection" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -20,6 +43,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sem conexão de internet"
+          }
+        }
+      }
+    },
+    "no_title_song" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Song without title"
+          }
+        },
+        "en_US" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Song without title"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Música sem título"
           }
         }
       }
