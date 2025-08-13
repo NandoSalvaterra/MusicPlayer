@@ -2,7 +2,7 @@ import Foundation
 
 public final class URLSessionClient: HTTPClient {
 
-    private let session: URLSession
+    private let session: URLSessionProtocol
     private let networkMonitor: NetworkMonitorProtocol
 
     public init(
@@ -13,6 +13,19 @@ public final class URLSessionClient: HTTPClient {
         self.session = URLSession(configuration: configuration)
         self.networkMonitor = networkMonitor
         self.networkMonitor.startMonitoring()
+    }
+
+    internal init(
+        session: URLSessionProtocol,
+        networkMonitor: NetworkMonitorProtocol
+    ) {
+        self.session = session
+        self.networkMonitor = networkMonitor
+        self.networkMonitor.startMonitoring()
+    }
+
+    deinit {
+        networkMonitor.stopMonitoring()
     }
 
     public func send<T: Decodable & Sendable>(_ request: URLRequest, decoder: JSONDecoder) async throws(Error) -> T {
@@ -42,9 +55,5 @@ public final class URLSessionClient: HTTPClient {
             }
             throw NetworkError.map(error)
         }
-    }
-    
-    deinit {
-        networkMonitor.stopMonitoring()
     }
 }
