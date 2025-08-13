@@ -13,6 +13,32 @@ struct SongListView: View {
                     .onTapGesture { selectedTrack = track }
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color(.black))
+                    .onAppear {
+                        let totalCount = viewModel.tracks.count
+                        if let currentIndex = viewModel.tracks.firstIndex(of: track),
+                           currentIndex >= totalCount - 3, // Trigger on last 3 items
+                           !viewModel.isLoadingMorePages && !viewModel.isLoading {
+                            Task {
+                                await viewModel.loadMoreIfNeeded()
+                            }
+                        }
+                    }
+            }
+
+            if viewModel.isLoadingMorePages {
+                HStack(spacing: 12) {
+                    Spacer()
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        .scaleEffect(1.0)
+                    Text(LocalizedStrings.loadingSongs)
+                        .foregroundColor(.white)
+                        .font(.system(size: 14, weight: .medium))
+                    Spacer()
+                }
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color(.black))
+                .padding(.vertical, 16)
             }
         }
         .listStyle(.plain)
@@ -25,6 +51,7 @@ struct SongListView: View {
         .toolbarColorScheme(colorScheme, for: .navigationBar)
         .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: LocalizedStrings.search)
         .onSubmit(of: .search) {
+            guard !viewModel.isLoadingMorePages else { return }
             Task {
                 await viewModel.search(query: viewModel.searchText)
             }
@@ -34,9 +61,14 @@ struct SongListView: View {
             PlayerView(track: track)
         }
         .task {
-            await viewModel.loadInitialData()
+            // Load initial data with Nirvana search on app start
+            guard viewModel.tracks.isEmpty else { return }
+            await viewModel.search(query: "Nirvana")
         }
         .refreshable {
+            guard !viewModel.isLoadingMorePages else {
+                return
+            }
             await viewModel.refresh()
         }
         .overlay {
