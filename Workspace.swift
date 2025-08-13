@@ -4,6 +4,7 @@ let workspace = Workspace(
     name: "MusicPlayer",
     projects: [
         "App",
+        "Data",
         "Network",
     ],
     generationOptions: .options(

@@ -2,35 +2,35 @@ import ProjectDescription
 import ProjectDescriptionHelpers
 
 let project = Project(
-    name: "App",
+    name: "Data",
     options: .musicPlayerOptions,
     settings: .projectSettings,
     targets: [
-        .target(
-            name: "App",
+        Target.target(
+            name: "Data",
             destinations: .iOS,
-            product: .app,
-            bundleId: "com.musicplayer.app",
+            product: .staticFramework,
+            bundleId: "com.musicplayer.data",
             deploymentTargets: .iOS("17.0"),
-            infoPlist: "SupportFiles/Info.plist",
+            infoPlist: "SupportFiles/Data-Info.plist",
             sources: ["Sources/**"],
-            resources: ["Resources/**"],
             dependencies: [
-                .project(target: "Data", path: "../Data")
+                .project(target: "Network", path: "../Network")
             ],
             settings: .projectSettings
         ),
         .target(
-            name: "AppTests",
+            name: "DataTests",
             destinations: .iOS,
             product: .unitTests,
-            bundleId: "com.musicplayer.app.tests",
+            bundleId: "com.musicplayer.data.tests",
             deploymentTargets: .iOS("17.0"),
-            infoPlist: "Tests/SupportFiles/AppTests-Info.plist",
+            infoPlist: "Tests/SupportFiles/DataTests-Info.plist",
             sources: ["Tests/**"],
             resources: [],
-            dependencies: [.target(name: "App")],
+            dependencies: [.target(name: "Data")],
             settings: .projectSettings
-        ),
+        )
     ]
 )
+

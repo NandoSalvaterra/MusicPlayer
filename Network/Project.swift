@@ -14,7 +14,6 @@ let project = Project(
             deploymentTargets: .iOS("17.0"),
             infoPlist: "SupportFiles/Network-Info.plist",
             sources: ["Sources/**"],
-            headers: .headers(public: ["Sources/Header/Network.h"]),
             dependencies: [],
             settings: .projectSettings
         ),
