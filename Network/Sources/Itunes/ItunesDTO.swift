@@ -1,16 +1,16 @@
 import Foundation
 
-public enum ItunesWrapperType: String, Decodable, Sendable {
+public enum ItunesWrapperType: String, Codable, Sendable {
     case collection = "collection"
     case track = "track"
 }
 
-public struct ItunesSearchResponseDTO: Decodable, Sendable {
+public struct ItunesSearchResponseDTO: Codable, Sendable {
     public let resultCount: Int
     public let results: [ItunesTrackDTO]
 }
 
-public struct ItunesTrackDTO: Decodable, Sendable {
+public struct ItunesTrackDTO: Codable, Sendable {
     public let trackId: Int?
     public let trackName: String?
     public let artistName: String?
