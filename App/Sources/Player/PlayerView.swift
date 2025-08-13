@@ -6,11 +6,11 @@ struct PlayerView: View {
     var songTitle: String = "Something"
     var artistName: String = "Artist"
 
-    @State private var isPlaying: Bool = false
-    @State private var currentTime: Double = 0
-    @State private var totalDuration: Double = 200
+    @State private var audioManager = AudioPlayerManager()
     @State private var showOptionsSheet: Bool = false
     @State private var showAlbumSongList: Bool = false
+    @State private var isUserDraggingSlider = false
+    @State private var currentSliderValue: Double = 0
 
     var body: some View {
             VStack(spacing: 0) {
@@ -44,10 +44,13 @@ struct PlayerView: View {
                 }
             }
             .sheet(isPresented: $showAlbumSongList) {
-                AlbumSongListView(albumTitle: "Album", artistName: artistName)
+                AlbumSongListView(albumTitle: "Album")
                     .presentationDetents([.large])
                     .presentationDragIndicator(.visible)
             }
+        .onAppear {
+            loadStaticTrack()
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: { showOptionsSheet = true }) {
@@ -84,13 +87,34 @@ struct PlayerView: View {
 
     private var timelineView: some View {
         VStack(spacing: 8) {
-            Slider(value: $currentTime, in: 0...max(totalDuration, 1))
-                .tint(Color(.white))
+            Slider(
+                value: Binding(
+                    get: { 
+                        isUserDraggingSlider ? currentSliderValue : audioManager.currentTime 
+                    },
+                    set: { newValue in
+                        currentSliderValue = newValue
+                    }
+                ),
+                in: 0...max(audioManager.duration, 1),
+                onEditingChanged: { editing in
+                    if editing {
+                        isUserDraggingSlider = true
+                    } else {
+                        audioManager.seek(to: currentSliderValue)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            isUserDraggingSlider = false
+                        }
+                    }
+                }
+            )
+            .tint(Color(.white))
+            
             HStack {
-                Text(formattedTime(currentTime))
+                Text(formattedTime(isUserDraggingSlider ? currentSliderValue : audioManager.currentTime))
                     .font(.system(size: 14, weight: .medium))
                 Spacer()
-                Text("-" + formattedTime(max(totalDuration - currentTime, 0)))
+                Text("-" + formattedTime(max(audioManager.duration - (isUserDraggingSlider ? currentSliderValue : audioManager.currentTime), 0)))
                     .font(.system(size: 14, weight: .regular))
             }.foregroundStyle(Color(.gray200))
         }
@@ -98,24 +122,34 @@ struct PlayerView: View {
 
     private var playbackControlsView: some View {
         HStack(spacing: 28) {
-            Button(action: { currentTime = max(currentTime - 15, 0) }) {
+            Button(action: { 
+                audioManager.seek(to: max(audioManager.currentTime - 15, 0))
+            }) {
                 Image(systemName: SFSymbols.backward)
                     .font(.title)
             }
 
-            Button(action: { isPlaying.toggle() }) {
-                ZStack {
-                    Circle()
-                        .fill(Color(.white))
-                        .frame(width: 64, height: 64)
-
-                    Image(systemName: isPlaying ? SFSymbols.pause : SFSymbols.play)
-                        .foregroundStyle(Color(.black))
-                        .font(.title2.weight(.bold))
+            Button(action: { 
+                if audioManager.isPlaying {
+                    audioManager.pause()
+                } else {
+                    audioManager.play()
                 }
+            }) {
+                Circle()
+                    .fill(Color(.white))
+                    .frame(width: 64, height: 64)
+                    .overlay(
+                        Image(systemName: audioManager.isPlaying ? SFSymbols.pause : SFSymbols.play)
+                            .foregroundStyle(Color(.black))
+                            .font(.title2.weight(.bold))
+                    )
             }
+            .disabled(audioManager.isLoading)
 
-            Button(action: { currentTime = min(currentTime + 15, totalDuration) }) {
+            Button(action: { 
+                audioManager.seek(to: min(audioManager.currentTime + 15, audioManager.duration))
+            }) {
                 Image(systemName: SFSymbols.forward)
                     .font(.title)
             }
@@ -126,6 +160,13 @@ struct PlayerView: View {
     private func formattedTime(_ seconds: Double) -> String {
         let total = Int(seconds.rounded())
         return String(format: "%d:%02d", total/60, total%60)
+    }
+    
+    private func loadStaticTrack() {
+        guard let url = URL(string: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/40/64/66/40646668-82fe-e7f4-6e09-1194fb0ced89/mzaf_7480774833552227899.plus.aac.p.m4a") else {
+            return
+        }
+        audioManager.loadTrack(url: url)
     }
 }
 
