@@ -1,10 +1,8 @@
 import SwiftUI
+import Data
 
 struct PlayerView: View {
     @Environment(\.colorScheme) private var colorScheme
-
-    var songTitle: String = "Something"
-    var artistName: String = "Artist"
 
     @State private var audioManager = AudioPlayerManager()
     @State private var showOptionsSheet: Bool = false
@@ -12,44 +10,59 @@ struct PlayerView: View {
     @State private var isUserDraggingSlider = false
     @State private var currentSliderValue: Double = 0
 
+    let track: Track
+
+    var songTitle: String {
+        track.title
+    }
+
+    var artistName: String {
+        track.artist
+    }
+
+    init(track: Track) {
+        self.track = track
+    }
+
     var body: some View {
-            VStack(spacing: 0) {
-                Spacer(minLength: 24)
+        VStack(spacing: 0) {
+            Spacer(minLength: 24)
 
-                albumArtworkView
-                    .padding(.bottom, 32)
+            albumArtworkView
+                .padding(.bottom, 32)
 
-                Spacer()
+            Spacer()
 
-                songInfoView
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 12)
+            songInfoView
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
 
-                timelineView
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+            timelineView
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
 
-                playbackControlsView
-                    .padding(.bottom, 22)
-            }.background(
-                Color(.black)
-                    .ignoresSafeArea(edges: .all)
-            )
-            .sheet(isPresented: $showOptionsSheet) {
-                SongOptionsSheet(title: songTitle, artist: artistName) {
-                    showOptionsSheet = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        showAlbumSongList = true
-                    }
+            playbackControlsView
+                .padding(.bottom, 22)
+        }.background(
+            Color(.black)
+                .ignoresSafeArea(edges: .all)
+        )
+        .sheet(isPresented: $showOptionsSheet) {
+            SongOptionsSheet(title: songTitle, artist: artistName) {
+                showOptionsSheet = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    showAlbumSongList = true
                 }
             }
-            .sheet(isPresented: $showAlbumSongList) {
-                AlbumSongListView(albumTitle: "Album")
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
-            }
+        }
+        .sheet(isPresented: $showAlbumSongList) {
+//              AlbumSongListView(albumTitle: "Album")
+//                .presentationDetents([.large])
+//                 .presentationDragIndicator(.visible)
+        }
         .onAppear {
-            loadStaticTrack()
+            guard let previewURL = track.previewURL else { return }
+            audioManager.loadTrack(url: previewURL)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -63,14 +76,21 @@ struct PlayerView: View {
     }
 
     private var albumArtworkView: some View {
-        RoundedRectangle(cornerRadius: 36, style: .continuous)
-            .fill(Color(.white).opacity(0.1))
-            .frame(width: 200, height: 200)
-            .overlay(
-                Image(.iconMusicNoteBig)
-                    .renderingMode(.template)
-                    .foregroundStyle(Color(.white))
-            )
+        AsyncImage(url: track.artworkURL) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } placeholder: {
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .fill(Color(.white).opacity(0.1))
+                .overlay(
+                    Image(.iconMusicNoteBig)
+                        .renderingMode(.template)
+                        .foregroundStyle(Color(.white))
+                )
+        }
+        .frame(width: 200, height: 200)
+        .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
     }
 
     private var songInfoView: some View {
@@ -89,8 +109,8 @@ struct PlayerView: View {
         VStack(spacing: 8) {
             Slider(
                 value: Binding(
-                    get: { 
-                        isUserDraggingSlider ? currentSliderValue : audioManager.currentTime 
+                    get: {
+                        isUserDraggingSlider ? currentSliderValue : audioManager.currentTime
                     },
                     set: { newValue in
                         currentSliderValue = newValue
@@ -109,7 +129,7 @@ struct PlayerView: View {
                 }
             )
             .tint(Color(.white))
-            
+
             HStack {
                 Text(formattedTime(isUserDraggingSlider ? currentSliderValue : audioManager.currentTime))
                     .font(.system(size: 14, weight: .medium))
@@ -122,14 +142,14 @@ struct PlayerView: View {
 
     private var playbackControlsView: some View {
         HStack(spacing: 28) {
-            Button(action: { 
+            Button(action: {
                 audioManager.seek(to: max(audioManager.currentTime - 15, 0))
             }) {
                 Image(systemName: SFSymbols.backward)
                     .font(.title)
             }
 
-            Button(action: { 
+            Button(action: {
                 if audioManager.isPlaying {
                     audioManager.pause()
                 } else {
@@ -147,7 +167,7 @@ struct PlayerView: View {
             }
             .disabled(audioManager.isLoading)
 
-            Button(action: { 
+            Button(action: {
                 audioManager.seek(to: min(audioManager.currentTime + 15, audioManager.duration))
             }) {
                 Image(systemName: SFSymbols.forward)
@@ -161,21 +181,14 @@ struct PlayerView: View {
         let total = Int(seconds.rounded())
         return String(format: "%d:%02d", total/60, total%60)
     }
-    
-    private func loadStaticTrack() {
-        guard let url = URL(string: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/40/64/66/40646668-82fe-e7f4-6e09-1194fb0ced89/mzaf_7480774833552227899.plus.aac.p.m4a") else {
-            return
-        }
-        audioManager.loadTrack(url: url)
-    }
 }
 
 #Preview("Dark") {
-    PlayerView()
+    PlayerView(track: .preview)
         .preferredColorScheme(.dark)
 }
 
 #Preview("Light") {
-    PlayerView()
+    PlayerView(track: .preview)
         .preferredColorScheme(.light)
 }

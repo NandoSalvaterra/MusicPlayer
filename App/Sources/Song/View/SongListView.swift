@@ -1,23 +1,16 @@
 import SwiftUI
-
-struct Song: Identifiable, Hashable {
-    let id = UUID()
-    let title: String
-    let artist: String
-}
+import Data
 
 struct SongListView: View {
-    let songs: [Song] = (0..<20).map { _ in Song(title: "Something", artist: "Artist") }
-
-    @State private var searchText = ""
-    @State private var selectedSong: Song? = nil
+    @State private var viewModel = SongListViewModel()
+    @State private var selectedTrack: Track?
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         List {
-            ForEach(songs) { song in
-                SongRow(title: song.title, artist: song.artist)
-                    .onTapGesture { selectedSong = song }
+            ForEach(viewModel.tracks) { track in
+                SongRow(track: track)
+                    .onTapGesture { selectedTrack = track }
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color(.black))
             }
@@ -30,11 +23,39 @@ struct SongListView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarBackground(Color(.black), for: .navigationBar)
         .toolbarColorScheme(colorScheme, for: .navigationBar)
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: LocalizedStrings.search)
-        .scrollDismissesKeyboard(.immediately)
-        .navigationDestination(item: $selectedSong) { song in
-            PlayerView()
+        .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: LocalizedStrings.search)
+        .onSubmit(of: .search) {
+            Task {
+                await viewModel.search(query: viewModel.searchText)
+            }
         }
+        .scrollDismissesKeyboard(.immediately)
+        .navigationDestination(item: $selectedTrack) { track in
+            PlayerView(track: track)
+        }
+        .task {
+            await viewModel.loadInitialData()
+        }
+        .refreshable {
+            await viewModel.refresh()
+        }
+        .overlay {
+            LoadingOverlay(
+                isVisible: viewModel.isLoading && viewModel.tracks.isEmpty,
+                message: LocalizedStrings.loadingSongs
+            )
+        }
+        .errorAlert(
+            errorMessage: $viewModel.errorMessage,
+            title: LocalizedStrings.unableToLoadSongs,
+            primaryButtonTitle: LocalizedStrings.tryAgain,
+            primaryAction: {
+                Task {
+                    await viewModel.refresh()
+                }
+            },
+            secondaryButtonTitle: LocalizedStrings.cancel
+        )
     }
 }
 
