@@ -17,7 +17,7 @@ let project = Project(
             dependencies: [
                 .project(target: "Network", path: "../Network")
             ],
-            settings: .projectSettings
+            settings: .frameworkTargetSettings
         ),
         .target(
             name: "DataTests",

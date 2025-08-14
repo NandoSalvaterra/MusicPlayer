@@ -40,6 +40,9 @@ public extension Settings {
 
                 "SWIFT_COMPILATION_MODE": "singlefile",
                 "SWIFT_TREAT_WARNINGS_AS_ERRORS": "NO",
+                
+                // Build optimizations recommended by Xcode
+                "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
             ],
             configurations: [
                 .debug(
@@ -52,9 +55,18 @@ public extension Settings {
                 .release(
                     name: "Release",
                     settings: [
-                        "SWIFT_OPTIMIZATION_LEVEL": "-O"
+                        "SWIFT_OPTIMIZATION_LEVEL": "-O",
+                        "SWIFT_COMPILATION_MODE": "wholemodule"
                     ]
                 )
+            ]
+        )
+    }
+    
+    static var frameworkTargetSettings: Settings {
+        .settings(
+            base: [
+                "CLANG_ENABLE_MODULE_VERIFIER": "YES"
             ]
         )
     }

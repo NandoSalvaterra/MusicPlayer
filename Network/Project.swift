@@ -15,7 +15,7 @@ let project = Project(
             infoPlist: "SupportFiles/Network-Info.plist",
             sources: ["Sources/**"],
             dependencies: [],
-            settings: .projectSettings
+            settings: .frameworkTargetSettings
         ),
         .target(
             name: "NetworkTests",
