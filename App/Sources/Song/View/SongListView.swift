@@ -7,7 +7,8 @@ struct SongListView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        List {
+        VStack(spacing: 0) {
+            List {
             ForEach(viewModel.tracks) { track in
                 SongRow(track: track)
                     .onTapGesture { selectedTrack = track }
@@ -40,42 +41,45 @@ struct SongListView: View {
                 .listRowBackground(Color(.black))
                 .padding(.vertical, 16)
             }
+            }
+            .listStyle(.plain)
+            .background(Color(.black))
+            .scrollContentBackground(.hidden)
+            .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: LocalizedStrings.search)
+            .onSubmit(of: .search) {
+                guard !viewModel.isLoadingMorePages else { return }
+                Task {
+                    await viewModel.search(query: viewModel.searchText)
+                }
+            }
+            .scrollDismissesKeyboard(.immediately)
+            .task {
+                // Load initial data with Nirvana search on app start
+                guard viewModel.tracks.isEmpty else { return }
+                await viewModel.search(query: "Nirvana")
+            }
+            .refreshable {
+                guard !viewModel.isLoadingMorePages else {
+                    return
+                }
+                await viewModel.refresh()
+            }
+            .overlay {
+                LoadingOverlay(
+                    isVisible: viewModel.isLoading && viewModel.tracks.isEmpty,
+                    message: LocalizedStrings.loadingSongs
+                )
+            }
+            
+            MiniPlayerView()
         }
-        .listStyle(.plain)
-        .background(Color(.black))
-        .scrollContentBackground(.hidden)
         .navigationTitle(LocalizedStrings.songs)
         .navigationBarTitleDisplayMode(.large)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarBackground(Color(.black), for: .navigationBar)
         .toolbarColorScheme(colorScheme, for: .navigationBar)
-        .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: LocalizedStrings.search)
-        .onSubmit(of: .search) {
-            guard !viewModel.isLoadingMorePages else { return }
-            Task {
-                await viewModel.search(query: viewModel.searchText)
-            }
-        }
-        .scrollDismissesKeyboard(.immediately)
         .navigationDestination(item: $selectedTrack) { track in
             PlayerView(track: track)
-        }
-        .task {
-            // Load initial data with Nirvana search on app start
-            guard viewModel.tracks.isEmpty else { return }
-            await viewModel.search(query: "Nirvana")
-        }
-        .refreshable {
-            guard !viewModel.isLoadingMorePages else {
-                return
-            }
-            await viewModel.refresh()
-        }
-        .overlay {
-            LoadingOverlay(
-                isVisible: viewModel.isLoading && viewModel.tracks.isEmpty,
-                message: LocalizedStrings.loadingSongs
-            )
         }
         .errorAlert(
             errorMessage: $viewModel.errorMessage,

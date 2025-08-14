@@ -4,7 +4,7 @@ import Data
 struct PlayerView: View {
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var audioManager = AudioPlayerManager()
+    private let audioManager = GlobalAudioManager.shared
     @State private var showOptionsSheet: Bool = false
     @State private var showAlbumSongList: Bool = false
     @State private var isUserDraggingSlider = false
@@ -59,8 +59,7 @@ struct PlayerView: View {
         .sheet(isPresented: $showAlbumSongList) {
             AlbumSongListView(track: track) { selectedTrack in
                 self.track = selectedTrack
-                guard let previewURL = selectedTrack.previewURL else { return }
-                audioManager.loadTrack(url: previewURL)
+                audioManager.loadTrack(selectedTrack)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     audioManager.play()
                 }
@@ -69,8 +68,7 @@ struct PlayerView: View {
             .presentationDragIndicator(.visible)
         }
         .onAppear {
-            guard let previewURL = track.previewURL else { return }
-            audioManager.loadTrack(url: previewURL)
+            audioManager.loadTrack(track)
             
             if !hasAutoPlayed {
                 hasAutoPlayed = true
