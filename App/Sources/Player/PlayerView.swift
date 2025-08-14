@@ -9,8 +9,9 @@ struct PlayerView: View {
     @State private var showAlbumSongList: Bool = false
     @State private var isUserDraggingSlider = false
     @State private var currentSliderValue: Double = 0
+    @State private var hasAutoPlayed = false
 
-    let track: Track
+    @State var track: Track
 
     var songTitle: String {
         track.title
@@ -56,13 +57,27 @@ struct PlayerView: View {
             }
         }
         .sheet(isPresented: $showAlbumSongList) {
-//              AlbumSongListView(albumTitle: "Album")
-//                .presentationDetents([.large])
-//                 .presentationDragIndicator(.visible)
+            AlbumSongListView(track: track) { selectedTrack in
+                self.track = selectedTrack
+                guard let previewURL = selectedTrack.previewURL else { return }
+                audioManager.loadTrack(url: previewURL)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    audioManager.play()
+                }
+            }
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
         .onAppear {
             guard let previewURL = track.previewURL else { return }
             audioManager.loadTrack(url: previewURL)
+            
+            if !hasAutoPlayed {
+                hasAutoPlayed = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    audioManager.play()
+                }
+            }
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {

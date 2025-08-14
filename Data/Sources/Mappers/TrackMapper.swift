@@ -23,6 +23,7 @@ public enum TrackMapper {
             title: trackName,
             artist: artistName,
             album: dto.collectionName,
+            albumId: dto.collectionId,
             duration: duration,
             trackNumber: dto.trackNumber,
             discNumber: dto.discNumber,

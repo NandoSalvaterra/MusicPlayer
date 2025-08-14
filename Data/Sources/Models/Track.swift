@@ -5,6 +5,7 @@ public struct Track: Identifiable, Sendable, Hashable {
     public let title: String
     public let artist: String
     public let album: String?
+    public let albumId: Int?
     public let duration: TimeInterval?
     public let trackNumber: Int?
     public let discNumber: Int?
@@ -17,6 +18,7 @@ public struct Track: Identifiable, Sendable, Hashable {
         title: String,
         artist: String,
         album: String? = nil,
+        albumId: Int? = nil,
         duration: TimeInterval? = nil,
         trackNumber: Int? = nil,
         discNumber: Int? = nil,
@@ -28,6 +30,7 @@ public struct Track: Identifiable, Sendable, Hashable {
         self.title = title
         self.artist = artist
         self.album = album
+        self.albumId = albumId
         self.duration = duration
         self.trackNumber = trackNumber
         self.discNumber = discNumber
