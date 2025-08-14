@@ -156,7 +156,7 @@ struct PlayerView: View {
     private var playbackControlsView: some View {
         HStack(spacing: 28) {
             Button(action: {
-                audioManager.seek(to: max(audioManager.currentTime - 15, 0))
+                audioManager.seek(to: max(audioManager.currentTime - 5, 0))
             }) {
                 Image(systemName: SFSymbols.backward)
                     .font(.title)
@@ -181,7 +181,7 @@ struct PlayerView: View {
             .disabled(audioManager.isLoading)
 
             Button(action: {
-                audioManager.seek(to: min(audioManager.currentTime + 15, audioManager.duration))
+                audioManager.seek(to: min(audioManager.currentTime + 5, audioManager.duration))
             }) {
                 Image(systemName: SFSymbols.forward)
                     .font(.title)
